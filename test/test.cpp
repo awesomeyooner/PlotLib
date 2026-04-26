@@ -8,22 +8,6 @@
 
 #include "PlotLib/implot_plotter.hpp"
 
-#include "plib/math/motion/cubic_hermite_spline.hpp"
-
-#include "plib/math/control/pid_controller.hpp"
-
-#include "plib/i2c/i2c.hpp"
-#include "plib/i2c/wire_device.hpp"
-
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_sdl2.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
-
-#include "implot/implot.h"
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-
 
 using namespace status_utils;
 
