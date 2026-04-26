@@ -89,15 +89,15 @@ status_utils::StatusCode ImPlotter::update()
     {
         const char* name = pair.first.c_str();
 
-        ImGui::ScrollingBuffer data = pair.second;
+        ScrollingBuffer data = pair.second;
 
         if(ImGui::TreeNodeEx(name))
         {
-            std::string x_text = "X Axis: " + util::to_string(data.getLatestPoint().x);
+            std::string x_text = "X Axis: " + util::to_string(data.get_latest_point().x);
 
             ImGui::BulletText(x_text.c_str());
 
-            std::string y_text = "Y Axis: " + util::to_string(data.getLatestPoint().y);
+            std::string y_text = "Y Axis: " + util::to_string(data.get_latest_point().y);
 
             ImGui::BulletText(y_text.c_str());
 
@@ -122,30 +122,16 @@ status_utils::StatusCode ImPlotter::update()
             const char* name = pair.first.c_str();
 
             // The data buffer
-            ImGui::ScrollingBuffer data = pair.second;
-
-            ImPlotSpec spec;
-            spec.Offset = data.Offset;
-            spec.Stride = 2 * sizeof(float);
-
+            ScrollingBuffer data = pair.second;
+            
+            // Plot it
             ImPlot::PlotLine(
-                name,
-                &data.Data[0].x,
-                &data.Data[0].y,
-                data.Data.size(),
-                spec
+                name, 
+                &data.data[0].x, 
+                &data.data[0].y, 
+                data.data.size(), 
+                data.get_spec()
             );
-
-            // // Plot it
-            // ImPlot::PlotLine(
-            //     name, 
-            //     &data.Data[0].x, 
-            //     &data.Data[0].y, 
-            //     data.Data.size(), 
-            //     0, // Flags
-            //     data.Offset, 
-            //     2*sizeof(float)
-            // );
         }
             
         ImPlot::EndPlot();
@@ -263,7 +249,7 @@ status_utils::StatusCode ImPlotter::plot_custom(std::function<status_utils::Stat
 void ImPlotter::push_data(double x_data, double y_data, std::string name)
 {
     // Push new data to the buffer at the specified name
-    initialize_data_map(name).AddPoint(x_data, y_data);
+    initialize_data_map(name).add_point(x_data, y_data);
 
 } // end of "push_data"
 
@@ -305,12 +291,12 @@ SDL_GLContext& ImPlotter::get_context()
 } // end of "get_context"
 
 
-ImGui::ScrollingBuffer& ImPlotter::initialize_data_map(std::string name)
+ScrollingBuffer& ImPlotter::initialize_data_map(std::string name)
 {
     // Add a new ScrollingBuffer to the map. `try_emplace` already protects
     // From the key already existing
 
-    ImGui::ScrollingBuffer buffer;
+    ScrollingBuffer buffer;
 
     m_data_map.try_emplace(name, buffer);
 
@@ -324,5 +310,5 @@ SDL_Window* ImPlotter::m_window = nullptr;
 SDL_GLContext ImPlotter::m_gl_context = NULL;
 
 float ImPlotter::m_history = 10;
-std::unordered_map<std::string, ImGui::ScrollingBuffer> ImPlotter::m_data_map;
+std::unordered_map<std::string, ScrollingBuffer> ImPlotter::m_data_map;
 ImPlotAxisFlags ImPlotter::m_axis_flags = ImPlotAxisFlags_PanStretch; // ImPlotAxisFlags_AutoFit;

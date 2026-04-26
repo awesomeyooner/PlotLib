@@ -14,68 +14,15 @@
 #include "imgui/backends/imgui_impl_sdl2.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
+#include "PlotLib/rolling_buffer.hpp"
+#include "PlotLib/scrolling_buffer.hpp"
+
 #include "implot/implot.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <cmath>
 
-// The code below (the code inside the namespace) is from `implot_demo.cpp`, this code is not mine
-
-namespace ImGui{
-
-// utility structure for realtime plot
-struct ScrollingBuffer {
-    int MaxSize;
-    int Offset;
-    ImVector<ImVec2> Data;
-    ScrollingBuffer(int max_size = 2000) {
-        MaxSize = max_size;
-        Offset  = 0;
-        Data.reserve(MaxSize);
-    }
-    void AddPoint(float x, float y) {
-        if (Data.size() < MaxSize)
-            Data.push_back(ImVec2(x,y));
-        else {
-            Data[Offset] = ImVec2(x,y);
-            Offset =  (Offset + 1) % MaxSize;
-        }
-    }
-    void Erase() {
-        if (Data.size() > 0) {
-            Data.shrink(0);
-            Offset  = 0;
-        }
-    }
-    ImVec2& getLatestPoint() {
-        int size = Data.size();
-
-        if (size < MaxSize)
-            return Data[size - 1];
-        else {
-            return Data[Offset];
-        }
-    }
-};
-    
-// utility structure for realtime plot
-struct RollingBuffer {
-    float Span;
-    ImVector<ImVec2> Data;
-    RollingBuffer() {
-        Span = 10.0f;
-        Data.reserve(2000);
-    }
-    void AddPoint(float x, float y) {
-        float xmod = fmodf(x, Span);
-        if (!Data.empty() && xmod < Data.back().x)
-            Data.shrink(0);
-        Data.push_back(ImVec2(xmod, y));
-    }
-};
-
-} // namespace ImGui
 
 /**
  * @brief Plotter class using ImPlot as the backend
@@ -179,17 +126,17 @@ class ImPlotter{
         static float m_history;
 
         // Map of Data Buffer
-        static std::unordered_map<std::string, ImGui::ScrollingBuffer> m_data_map;
-        // static ImGui::ScrollingBuffer m_data;
+        static std::unordered_map<std::string, ScrollingBuffer> m_data_map;
+        // static ScrollingBuffer m_data;
 
 
         /**
          * @brief Initialize the Buffer at the specified name in the data map
          * 
          * @param name `std::string` - The name of the plot
-         * @return `ImGui::ScrollingBuffer` The buffer at `name`
+         * @return `ScrollingBuffer` The buffer at `name`
          */
-        static ImGui::ScrollingBuffer& initialize_data_map(std::string name);
+        static ScrollingBuffer& initialize_data_map(std::string name);
 
 }; // class ImPlotter
 

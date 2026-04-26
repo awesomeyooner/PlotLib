@@ -32,6 +32,9 @@ set(IMPLOT_FILES
 
 set(SRC_FILES
     src/implot_plotter.cpp
+
+    src/scrolling_buffer.cpp
+    src/rolling_buffer.cpp
 )
 
 # === Main Library ===
