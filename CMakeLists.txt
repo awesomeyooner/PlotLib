@@ -5,35 +5,44 @@ project( PlotLib LANGUAGES C CXX )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+find_package(OpenGL REQUIRED)
+find_package(SDL2 REQUIRED CONFIG)
+
 set(IMGUI_FILES
+
     # ImGUI Core
     lib/imgui/imgui_demo.cpp
     lib/imgui/imgui_draw.cpp
     lib/imgui/imgui_tables.cpp
     lib/imgui/imgui_widgets.cpp
     lib/imgui/imgui.cpp
+
+    # ImGUI Backend
+    lib/imgui/backends/imgui_impl_opengl3.cpp
+    lib/imgui/backends/imgui_impl_sdl2.cpp
+)
+
+set(IMPLOT_FILES
+
+    # ImPlot Core
+    lib/implot/implot_demo.cpp
+    lib/implot/implot_items.cpp
+    lib/implot/implot.cpp
+)
+
+set(SRC_FILES
+    src/implot_plotter.cpp
 )
 
 # === Main Library ===
 add_library(${PROJECT_NAME}
-    # src/util/logger.cpp
-    # src/util/status.cpp
-    # src/util/gnu_plotter.cpp
-    # src/util/implot_plotter.cpp
-    # src/util/util.cpp
-    # src/util/system.cpp
-
     ${IMGUI_FILES}
-
-    # ImGUI Backend
-    # lib/imgui/backends/imgui_impl_opengl3.cpp
-    # lib/imgui/backends/imgui_impl_sdl2.cpp
-
-    # # ImPlot
-    # lib/implot/implot_demo.cpp
-    # lib/implot/implot_items.cpp
-    # lib/implot/implot.cpp
+    ${IMPLOT_FILES}
+    ${SRC_FILES}
 )
+
+# Add plib
+add_subdirectory(lib/plib)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
@@ -57,6 +66,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     OpenGL::GL
     SDL2::SDL2 
+    plib
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
