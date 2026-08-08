@@ -3,12 +3,35 @@ CMake library for real-time plotting.
 
 ## Setup
 
+The folder structure should resemble the following:
+
+```c++
+.
+├── build
+├── CMakeLists.txt
+├── lib // Put here!
+├── include
+├── src
+└── CMakeLists.txt
+```
+
+First, clone the repo into `/lib`
+
 ```bash
 # Clone as standalone
 $ git clone https://github.com/awesomeyooner/PlotLib.git && git submodule update --init --recursive
 
 # Clone as submodule
 $ git submodule add https://github.com/awesomeyooner/PlotLib.git && git submodule update --init --recursive
+```
+
+Also make sure that [plib](https://github.com/awesomeyooner/plib) is also put in `/lib`!
+
+Then add these lines to your `CMakeLists.txt` file
+
+```cmake
+add_subdirectory(lib/PlotLib)
+target_link_libraries( ${MAIN_EXEC} PlotLib )
 ```
 
 ## Usage
