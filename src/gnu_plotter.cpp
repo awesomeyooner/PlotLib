@@ -51,7 +51,7 @@ void GNUPlotter::push_data(std::string time, std::string data)
 void GNUPlotter::push_data(std::string data)
 {
     // Automatically fill in time as the time since start
-    push_data(util::to_string(System::get_time_since_start()), data);
+    push_data(util::to_string(System::get_epoch()), data);
 
 } // end of "push_data"
 
@@ -59,7 +59,7 @@ void GNUPlotter::push_data(std::string data)
 void GNUPlotter::push_data(double data)
 {
     // Automatically fill in time as time since start and convert data to string
-    push_data(util::to_string(System::get_time_since_start()), util::to_string(data));
+    push_data(util::to_string(System::get_epoch()), util::to_string(data));
 
 } // end of "push_data"
 
@@ -67,7 +67,7 @@ void GNUPlotter::push_data(double data)
 void GNUPlotter::push_data(float data)
 {
     // Automatically fill in time as time since start and convert data to string
-    push_data(util::to_string(System::get_time_since_start()), util::to_string(data));
+    push_data(util::to_string(System::get_epoch()), util::to_string(data));
 
 } // end of "push_data"
 
@@ -75,7 +75,7 @@ void GNUPlotter::push_data(float data)
 void GNUPlotter::push_data(int data)
 {
     // Automatically fill in time as time since start and convert data to string
-    push_data(util::to_string(System::get_time_since_start()), util::to_string(data));
+    push_data(util::to_string(System::get_epoch()), util::to_string(data));
 
 } // end of "push_
 
@@ -84,7 +84,7 @@ void GNUPlotter::plot_with_range(double x_axis_width)
 {
     // Set the range from (now - width) to now
     std::string range_cmd = "set xrange [";
-    range_cmd += std::to_string(System::get_time_since_start() - x_axis_width) + " : " + std::to_string(System::get_time_since_start()) + "]\n";
+    range_cmd += std::to_string(System::get_epoch() - x_axis_width) + " : " + std::to_string(System::get_epoch()) + "]\n";
     fprintf(m_gnuplot, range_cmd.c_str());
     fprintf(m_gnuplot, "plot 'data.txt' using 1:2 with lines title 'Y Axis'\n");
     fflush(m_gnuplot);
@@ -126,7 +126,7 @@ void GNUPlotter::plot(std::string time, std::string data)
 void GNUPlotter::plot(std::string data)
 {
     // Plot with time autofilled
-    plot_with_range(util::to_string(System::get_time_since_start()), data);
+    plot_with_range(util::to_string(System::get_epoch()), data);
 
 } // end of "plot"
 

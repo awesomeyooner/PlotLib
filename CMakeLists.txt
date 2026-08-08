@@ -45,7 +45,11 @@ add_library(${PROJECT_NAME}
 )
 
 # Add plib
-add_subdirectory(lib/plib)
+if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(lib/plib)
+endif()
+
+target_link_libraries(${PROJECT_NAME} plib)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
@@ -69,7 +73,6 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     OpenGL::GL
     SDL2::SDL2 
-    plib
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)

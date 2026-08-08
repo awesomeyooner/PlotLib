@@ -112,7 +112,7 @@ status_utils::StatusCode ImPlotter::update()
     {
         
         ImPlot::SetupAxes("Time (s)", "Y Axis", m_axis_flags, m_axis_flags);
-        ImPlot::SetupAxisLimits(ImAxis_X1, System::get_time_since_start() - m_history, System::get_time_since_start(), ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, System::get_epoch() - m_history, System::get_epoch(), ImGuiCond_Always);
         // ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
 
         // For every pair in the map, plot the data buffer
@@ -257,7 +257,7 @@ void ImPlotter::push_data(double x_data, double y_data, std::string name)
 void ImPlotter::push_data(double data, std::string name)
 {
     // Fill in X Axis value as time since start
-    push_data(System::get_time_since_start(), data, name);
+    push_data(System::get_epoch(), data, name);
     
 } // end of "push_data"
 
