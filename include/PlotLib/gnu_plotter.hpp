@@ -12,9 +12,8 @@
 #include <fstream>
 #include <chrono>
 
-#include "util.hpp"
-#include "status.hpp"
-#include "system.hpp"
+#include "plib/util/status.hpp"
+#include "plib/util/system.hpp"
 
 class GNUPlotter{
 
