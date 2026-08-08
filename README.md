@@ -1,5 +1,15 @@
 # PlotLib
-CMake library for real-time plotting.
+CMake library for real-time plotting. 
+
+## Setup
+
+```bash
+# Clone as standalone
+$ git clone https://github.com/awesomeyooner/PlotLib.git && git submodule update --init --recursive
+
+# Clone as submodule
+$ git submodule add https://github.com/awesomeyooner/PlotLib.git && git submodule update --init --recursive
+```
 
 ## Usage
 
@@ -44,5 +54,6 @@ int main(int argc, char* argv[])
     ImPlotter::shutdown();
 
     return 0;
-}
+
+} // end of "main(int, char*)
 ```

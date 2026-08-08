@@ -31,6 +31,7 @@ set(IMPLOT_FILES
 )
 
 set(SRC_FILES
+    src/gnu_plotter.cpp
     src/implot_plotter.cpp
 
     src/scrolling_buffer.cpp
@@ -45,10 +46,6 @@ add_library(${PROJECT_NAME}
 )
 
 # Add plib
-if(PROJECT_IS_TOP_LEVEL)
-    add_subdirectory(lib/plib)
-endif()
-
 target_link_libraries(${PROJECT_NAME} plib)
 
 target_include_directories(${PROJECT_NAME}
