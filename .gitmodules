@@ -4,6 +4,3 @@
 [submodule "lib/implot"]
 	path = lib/implot
 	url = https://github.com/epezent/implot.git
-[submodule "lib/plib"]
-	path = lib/plib
-	url = https://github.com/awesomeyooner/plib.git
