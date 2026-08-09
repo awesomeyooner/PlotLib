@@ -1,6 +1,7 @@
 #ifndef IMPLOT_PLOTTER_HPP
 #define IMPLOT_PLOTTER_HPP
 
+
 #include <iostream>
 #include <cstdio>
 #include <unordered_map>
@@ -10,14 +11,14 @@
 #include "plib/util/status.hpp"
 #include "plib/util/logger.hpp"
 
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_sdl2.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_opengl3.h"
 
 #include "PlotLib/rolling_buffer.hpp"
 #include "PlotLib/scrolling_buffer.hpp"
 
-#include "implot/implot.h"
+#include "implot.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -33,7 +34,7 @@ class ImPlotter{
     public:
 
         // Flags
-        static ImPlotAxisFlags m_axis_flags;
+        static inline ImPlotAxisFlags m_axis_flags = ImPlotAxisFlags_PanStretch; // ImPlotAxisFlags_AutoFit;
 
         /**
          * @brief Initialize ImGui and its backends
@@ -42,15 +43,22 @@ class ImPlotter{
          * @param verbose `bool` Flag for displaying error output 
          * @return `status_utils::StatusCode` OK if successful, FAILED otherwise 
          */
-        static status_utils::StatusCode initialize(std::string window_name = "My Window", bool verbose = false);
+        static status_utils::StatusCode init(std::string window_name = "My Window", bool verbose = false);
 
 
         /**
          * @brief Display the plot
          * 
+         * @param add_input `std::function<void()> = nullptr` Used to add any forms of input like
+         * ```
+         * ImGui::SliderFloat("Hello World!", &my_var, MIN, MAX, "%.1f units");
+         * ImGui::InputFloat("Hello World!", &my_var, STEP_CLICK, STEP_HOLD, "%.1f units");
+         * ```
+         * This gets called before `ImPlot::begin`
+         * 
          * @return `status_utils::StatusCode` FAILED if exit request sent. OK otherwise 
          */
-        static status_utils::StatusCode update();
+        static status_utils::StatusCode update(std::function<void()> add_input = nullptr);
 
 
         /**
@@ -116,27 +124,56 @@ class ImPlotter{
 
     private:
 
-        // SDL Window
-        static SDL_Window* m_window;
-
-        // OpenGL Context
-        static SDL_GLContext m_gl_context;
-
-        // History / Width of Plot
-        static float m_history;
-
-        // Map of Data Buffer
-        static std::unordered_map<std::string, ScrollingBuffer> m_data_map;
-        // static ScrollingBuffer m_data;
-
-
         /**
          * @brief Initialize the Buffer at the specified name in the data map
          * 
          * @param name `std::string` - The name of the plot
          * @return `ScrollingBuffer` The buffer at `name`
          */
-        static ScrollingBuffer& initialize_data_map(std::string name);
+        static ScrollingBuffer& init_data_map(std::string name);
+
+        /**
+         * @brief Displays the current X and Y values for each buffer as text
+         * 
+         * @return `status_utils::StatusCode` Always OK 
+         */
+        static status_utils::StatusCode display_buffer_XY();
+
+        /**
+         * @brief Plots the entire buffer data
+         * 
+         * @return `status_utils::StatusCode` Always OK 
+         */
+        static status_utils::StatusCode plot_buffer_data();
+
+        /**
+         * @brief Start an ImGUI window and read SDL events. Returns `StatusCode::FAILED` if SDL event
+         * was EXIT. OK otherwise
+         * 
+         * @param name `std::string` The name of the ImGUI window
+         * @return `status_utils::StatusCode` OK if successful, FAILED if request was sent to exit 
+         */
+        static status_utils::StatusCode begin_window(std::string name = "Plotter");
+
+        /**
+         * @brief End the ImGUI window
+         * 
+         * @return `status_utils::StatusCode` Always returns OK (for now) 
+         */
+        static status_utils::StatusCode end_window();
+
+        // SDL Window
+        static inline SDL_Window* m_window = nullptr;
+
+        // OpenGL Context
+        static inline SDL_GLContext m_gl_context = NULL;
+
+        // History / Width of Plot
+        static inline float m_history = 10;
+
+        // Map of Data Buffer
+        static inline std::unordered_map<std::string, ScrollingBuffer> m_data_map;
+        // static ScrollingBuffer m_data;
 
 }; // class ImPlotter
 

@@ -7,7 +7,7 @@
 using namespace status_utils;
 
 
-status_utils::StatusCode ImPlotter::initialize(std::string window_name, bool verbose)
+StatusCode ImPlotter::init(std::string window_name, bool verbose)
 {
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
@@ -16,7 +16,7 @@ status_utils::StatusCode ImPlotter::initialize(std::string window_name, bool ver
         if(verbose)
             Logger::error(std::string("ImPlotter::initialize - ") + SDL_GetError());
 
-        return status_utils::StatusCode::FAILED;
+        return StatusCode::FAILED;
     }
 
     // OpenGL Settings
@@ -60,122 +60,48 @@ status_utils::StatusCode ImPlotter::initialize(std::string window_name, bool ver
 } // end of "initialize"
 
 
-status_utils::StatusCode ImPlotter::update()
+StatusCode ImPlotter::update(std::function<void()> add_input)
 {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-        ImGui_ImplSDL2_ProcessEvent(&event);
-
-        if (event.type == SDL_QUIT)
-            return status_utils::StatusCode::FAILED;
-    }
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-
-    // Center the plot
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    
-    // Make the plot size equal to the main window size
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
-
-    // Start the plot. Make the widget fixed in size
-    ImGui::Begin("Plotter", nullptr, ImGuiWindowFlags_NoResize);
+    if(begin_window("Plotter") == StatusCode::FAILED)
+        return StatusCode::FAILED;
 
     // Display Each Axis Value for each Data Buffer
-    for(const auto& pair : m_data_map)
-    {
-        const char* name = pair.first.c_str();
-
-        ScrollingBuffer data = pair.second;
-
-        if(ImGui::TreeNodeEx(name))
-        {
-            std::string x_text = "X Axis: " + util::to_string(data.get_latest_point().x);
-
-            ImGui::BulletText(x_text.c_str());
-
-            std::string y_text = "Y Axis: " + util::to_string(data.get_latest_point().y);
-
-            ImGui::BulletText(y_text.c_str());
-
-            ImGui::TreePop();
-        }
-    }
+    display_buffer_XY();
 
     // Add Slider for changing the history
     ImGui::SliderFloat("History", &m_history, 1, 30, "%.1f s");
 
+    // If the runnable isn't empty then call it
+    if(add_input)
+        add_input();
+
     if(ImPlot::BeginPlot("My Plot", ImVec2(-1, -1)))
     {
         
+        // Label each axis
         ImPlot::SetupAxes("Time (s)", "Y Axis", m_axis_flags, m_axis_flags);
+
+        // Set the X Axis limit to be real-time and as wide as `m_history`
         ImPlot::SetupAxisLimits(ImAxis_X1, System::get_epoch() - m_history, System::get_epoch(), ImGuiCond_Always);
+        
+        // You can limi the Y axis using this
         // ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
 
-        // For every pair in the map, plot the data buffer
-        for(const auto& pair : m_data_map)
-        {
-            // The name of the plot
-            const char* name = pair.first.c_str();
-
-            // The data buffer
-            ScrollingBuffer data = pair.second;
-            
-            // Plot it
-            ImPlot::PlotLine(
-                name, 
-                &data.data[0].x, 
-                &data.data[0].y, 
-                data.data.size(), 
-                data.get_spec()
-            );
-        }
+        // Plot all buffers in the map
+        plot_buffer_data();
             
         ImPlot::EndPlot();
     }
 
-    ImGui::End();
-
-    ImGui::Render();
-
-    glViewport(0, 0, 800, 600);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(m_window);
-
-    return status_utils::StatusCode::OK;
+    return end_window();
 
 } // end of "update"
 
 
-status_utils::StatusCode ImPlotter::plot_fixed(std::vector<double>& data_x, std::vector<double>& data_y)
+StatusCode ImPlotter::plot_fixed(std::vector<double>& data_x, std::vector<double>& data_y)
 {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-        ImGui_ImplSDL2_ProcessEvent(&event);
-
-        if (event.type == SDL_QUIT)
-            return status_utils::StatusCode::FAILED;
-    }
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-
-    // Center the plot
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    
-    // Make the plot size equal to the main window size
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
-
-    // Start the plot. Make the widget fixed in size
-    ImGui::Begin("Plotter", nullptr, ImGuiWindowFlags_NoResize);
+    if(begin_window("Plotter") == StatusCode::FAILED)
+        return StatusCode::FAILED;
 
     if(ImPlot::BeginPlot("My Plot", ImVec2(-1, -1)))
     {
@@ -188,60 +114,19 @@ status_utils::StatusCode ImPlotter::plot_fixed(std::vector<double>& data_x, std:
         ImPlot::EndPlot();
     }
 
-    ImGui::End();
-
-    ImGui::Render();
-
-    glViewport(0, 0, 800, 600);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(m_window);
-
-    return status_utils::StatusCode::OK;
+    return end_window();
 
 } // end of "update"
 
 
-status_utils::StatusCode ImPlotter::plot_custom(std::function<status_utils::StatusCode(SDL_Window*, SDL_GLContext&)> runnable)
+StatusCode ImPlotter::plot_custom(std::function<StatusCode(SDL_Window*, SDL_GLContext&)> runnable)
 {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-        ImGui_ImplSDL2_ProcessEvent(&event);
-
-        if (event.type == SDL_QUIT)
-            return status_utils::StatusCode::FAILED;
-    }
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-
-    // Center the plot
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    
-    // Make the plot size equal to the main window size
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
-
-    // Start the plot. Make the widget fixed in size
-    ImGui::Begin("Plotter", nullptr, ImGuiWindowFlags_NoResize);
+    if(begin_window("Plotter") == StatusCode::FAILED)
+        return StatusCode::FAILED;
 
     runnable(m_window, m_gl_context);
 
-    ImGui::End();
-
-    ImGui::Render();
-
-    glViewport(0, 0, 800, 600);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(m_window);
-
-    return status_utils::StatusCode::OK;
+    end_window();
 
 } // end of "plot_custom"
 
@@ -249,7 +134,7 @@ status_utils::StatusCode ImPlotter::plot_custom(std::function<status_utils::Stat
 void ImPlotter::push_data(double x_data, double y_data, std::string name)
 {
     // Push new data to the buffer at the specified name
-    initialize_data_map(name).add_point(x_data, y_data);
+    init_data_map(name).add_point(x_data, y_data);
 
 } // end of "push_data"
 
@@ -291,7 +176,7 @@ SDL_GLContext& ImPlotter::get_context()
 } // end of "get_context"
 
 
-ScrollingBuffer& ImPlotter::initialize_data_map(std::string name)
+ScrollingBuffer& ImPlotter::init_data_map(std::string name)
 {
     // Add a new ScrollingBuffer to the map. `try_emplace` already protects
     // From the key already existing
@@ -303,12 +188,104 @@ ScrollingBuffer& ImPlotter::initialize_data_map(std::string name)
     // Return the buffer at `name`
     return m_data_map.at(name);
 
-} // end of "initialize_data_map"
+} // end of "init_data_map"
 
 
-SDL_Window* ImPlotter::m_window = nullptr;
-SDL_GLContext ImPlotter::m_gl_context = NULL;
+StatusCode ImPlotter::begin_window(std::string name)
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        ImGui_ImplSDL2_ProcessEvent(&event);
 
-float ImPlotter::m_history = 10;
-std::unordered_map<std::string, ScrollingBuffer> ImPlotter::m_data_map;
-ImPlotAxisFlags ImPlotter::m_axis_flags = ImPlotAxisFlags_PanStretch; // ImPlotAxisFlags_AutoFit;
+        if (event.type == SDL_QUIT)
+            return StatusCode::FAILED;
+    }
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    // Center the plot
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    
+    // Make the plot size equal to the main window size
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
+
+    // Start the plot. Make the widget fixed in size
+    ImGui::Begin(name.c_str(), nullptr, ImGuiWindowFlags_NoResize);
+
+    return StatusCode::OK;
+
+} // end of "begin_window(std::string)"
+
+
+StatusCode ImPlotter::display_buffer_XY()
+{
+    // Display Each Axis Value for each Data Buffer
+    for(const auto& pair : m_data_map)
+    {
+        const char* name = pair.first.c_str();
+
+        ScrollingBuffer data = pair.second;
+
+        if(ImGui::TreeNodeEx(name))
+        {
+            std::string x_text = "X Axis: " + util::to_string(data.get_latest_point().x);
+
+            ImGui::BulletText(x_text.c_str());
+
+            std::string y_text = "Y Axis: " + util::to_string(data.get_latest_point().y);
+
+            ImGui::BulletText(y_text.c_str());
+
+            ImGui::TreePop();
+        }
+    }
+
+    return StatusCode::OK;
+    
+} // end of "display_buffer_XY()"
+
+
+StatusCode ImPlotter::plot_buffer_data()
+{
+    for(const auto& pair : m_data_map)
+    {
+        // The name of the plot
+        const char* name = pair.first.c_str();
+
+        // The data buffer
+        ScrollingBuffer data = pair.second;
+        
+        // Plot it
+        ImPlot::PlotLine(
+            name, 
+            &data.data[0].x, 
+            &data.data[0].y, 
+            data.data.size(), 
+            data.get_spec()
+        );
+    }
+
+    return StatusCode::OK;
+
+} // end of "plot_buffer_data()"
+
+
+StatusCode ImPlotter::end_window()
+{
+    ImGui::End();
+
+    ImGui::Render();
+
+    glViewport(0, 0, 800, 600);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(m_window);
+
+    return StatusCode::OK;
+
+} // end of "end_window()"

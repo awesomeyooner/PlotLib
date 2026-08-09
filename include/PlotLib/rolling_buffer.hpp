@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-#include "implot/implot.h"
+#include "implot.h"
 
 // The code below (the code inside the namespace) is from `implot_demo.cpp`, this code is not mine
 
