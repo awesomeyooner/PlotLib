@@ -52,16 +52,14 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib>
-        $<INSTALL_INTERFACE:lib>
+)
 
-        # You don't have to include these few lines below btw
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui>
         $<INSTALL_INTERFACE:lib/imgui>
-        # $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends>
-        # $<INSTALL_INTERFACE:lib/imgui/backends>
-        # $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/implot>
-        # $<INSTALL_INTERFACE:lib/implot>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/implot>
+        $<INSTALL_INTERFACE:lib/implot>
 
         ${SDL2_INCLUDE_DIRS}
 )

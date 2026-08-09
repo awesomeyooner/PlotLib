@@ -1,6 +1,7 @@
 #ifndef IMPLOT_PLOTTER_HPP
 #define IMPLOT_PLOTTER_HPP
 
+
 #include <iostream>
 #include <cstdio>
 #include <unordered_map>
@@ -10,14 +11,14 @@
 #include "plib/util/status.hpp"
 #include "plib/util/logger.hpp"
 
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_sdl2.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_opengl3.h"
 
 #include "PlotLib/rolling_buffer.hpp"
 #include "PlotLib/scrolling_buffer.hpp"
 
-#include "implot/implot.h"
+#include "implot.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
