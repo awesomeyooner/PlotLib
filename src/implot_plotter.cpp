@@ -71,6 +71,15 @@ StatusCode ImPlotter::update(std::function<void()> add_input)
     // Add Slider for changing the history
     ImGui::SliderFloat("History", &m_history, 1, 30, "%.1f s");
 
+    // Add Checkbox for toggling autofit
+    if(ImGui::Checkbox("Enable Auto Size", &m_use_autofit))
+    {
+        if(m_use_autofit)
+            ImPlotter::use_autofit();
+        else
+            ImPlotter::use_panstretch();
+    }
+
     // If the runnable isn't empty then call it
     if(add_input)
         add_input();
@@ -145,6 +154,20 @@ void ImPlotter::push_data(double data, std::string name)
     push_data(System::get_epoch(), data, name);
     
 } // end of "push_data"
+
+
+void ImPlotter::use_autofit()
+{
+    ImPlotter::m_axis_flags = ImPlotAxisFlags_AutoFit;
+
+} // end of "use_autofit()"
+
+
+void ImPlotter::use_panstretch()
+{
+    ImPlotter::m_axis_flags = ImPlotAxisFlags_PanStretch;
+
+} // end of "use_panstretch()"
 
 
 void ImPlotter::shutdown()

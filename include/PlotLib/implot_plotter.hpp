@@ -100,6 +100,28 @@ class ImPlotter{
 
 
         /**
+         * @brief Changes the axis mode to auto fit to the data plotted. This is the same as
+         * 
+         * ```
+         * ImPlotter::m_axis_flags = ImPlotAxisFlags_AutoFit;
+         * ```
+         * 
+         */
+        static void use_autofit();
+        
+
+        /**
+         * @brief Changes the axis mode to be manual stretch and panning. This is the same as
+         * 
+         * ```
+         * ImPlotter::m_axis_flags = ImPlotAxisFlags_PanStretch;
+         * ```
+         * 
+         */
+        static void use_panstretch();
+
+
+        /**
          * @brief Shutdown ImGui and the backends
          * 
          */
@@ -170,6 +192,9 @@ class ImPlotter{
 
         // History / Width of Plot
         static inline float m_history = 10;
+
+        // Set to true to have the plot autofit to the data. Set to false to manually pan and stretch
+        static inline bool m_use_autofit = false;
 
         // Map of Data Buffer
         static inline std::unordered_map<std::string, ScrollingBuffer> m_data_map;
