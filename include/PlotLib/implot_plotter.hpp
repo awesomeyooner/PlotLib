@@ -53,6 +53,11 @@ class ImPlotter{
          * ```
          * ImGui::SliderFloat("Hello World!", &my_var, MIN, MAX, "%.1f units");
          * ImGui::InputFloat("Hello World!", &my_var, STEP_CLICK, STEP_HOLD, "%.1f units");
+         * 
+         * if(ImGui::Checkbox("My Checkbox", &MY_BOOL))
+         * {
+         *  // Checkbox has been clicked!
+         * }
          * ```
          * This gets called before `ImPlot::begin`
          * 
